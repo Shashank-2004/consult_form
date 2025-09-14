@@ -60,12 +60,12 @@ function sendConsultationEmail(data, res) {
   };
 
   transporter.sendMail(mailOptions, (error) => {
-    if (error) {
-      console.error("❌ Email error:", error);
-      return res.json({ success: false, message: "Failed to send email" });
-    }
-    res.json({ success: true, message: "Email sent successfully!" });
-  });
+  if (error) {
+    console.error("❌ Email error:", error);
+    return res.json({ success: false, message: "Email error: " + error.message });
+  }
+  res.json({ success: true, message: "Email sent successfully!" });
+});
 }
 
 // Main form submission route
