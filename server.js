@@ -12,6 +12,11 @@ app.use(bodyParser.json());
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
 
+// Default route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(publicPath, "index.html"));
+});
+
 // Nodemailer setup
 let transporter = nodemailer.createTransport({
   service: "gmail",
