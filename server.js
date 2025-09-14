@@ -8,11 +8,13 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static frontend
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files from public
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
 
+// Default route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
 // Nodemailer setup
