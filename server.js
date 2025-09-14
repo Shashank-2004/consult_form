@@ -26,18 +26,15 @@ app.get("/", (req, res) => {
 
 // Nodemailer setup (✅ uses Render env vars for safety)
 let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use 'false' for STARTTLS
+  host: "smtp-relay.brevo.com",
+  port: 587, // or 465 if you want SSL
+  secure: false, // true for 465, false for 587
   auth: {
-    user: process.env.GMAIL_USER, // set in Render Environment
-    pass: process.env.GMAIL_PASS  // set in Render Environment
-  },
-  tls: {
-    // This is optional, but can help with some firewalls
-    rejectUnauthorized: false
+    user: process.env.BREVO_USER,  // your Brevo email
+    pass: process.env.BREVO_PASS   // your Brevo API key
   }
 });
+
 
 // Email sending function
 function sendConsultationEmail(data, res) {
