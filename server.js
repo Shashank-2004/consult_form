@@ -5,7 +5,10 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://shashank-2004.github.io"  // allow only your GitHub Pages site
+}));
+
 app.use(bodyParser.json());
 
 // Serve static files from public
