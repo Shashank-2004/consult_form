@@ -2,7 +2,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const fetch = require("node-fetch"); // if using Node 18+, built-in fetch is OK
+const fetch = require("node-fetch"); // Node 18+ has global fetch, but safe to include
 
 const app = express();
 
@@ -26,18 +26,18 @@ app.post("/submit", async (req, res) => {
     return res.json({ success: false, message: "All fields are required" });
   }
 
-  // Brevo API call
   try {
-    const response = await fetch("https://api.sendinblue.com/v3/smtp/email", {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        "api-key": process.env.BREVO_API_KEY, // Set this in Render environment variables
+        "api-key": process.env.BREVO_API_KEY,
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
       body: JSON.stringify({
         sender: { name: "Consultation Form", email: process.env.BREVO_SENDER },
-        to: [{ email: process.env.BREVO_RECEIVER }], // who receives the email
+        to: [{ email: process.env.BREVO_RECEIVER }],
+        replyTo: { email: email, name: name },  // 👈 user’s email here
         subject: "New Consultation Request",
         htmlContent: `
           <h2>New Consultation Request</h2>
