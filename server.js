@@ -1,11 +1,16 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const fetch = require("node-fetch"); // Make sure it's installed: npm install node-fetch@2
+const fetch = require("node-fetch");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+
+// Health check (useful for testing if backend is running)
+app.get("/", (req, res) => {
+  res.json({ status: "OK", message: "Consultation Form API is running 🚀" });
+});
 
 app.post("/send", async (req, res) => {
   const { name, mobile, age, email } = req.body;
@@ -17,7 +22,7 @@ app.post("/send", async (req, res) => {
       method: "POST",
       headers: {
         "accept": "application/json",
-        "api-key": process.env.BREVO_API_KEY, // Your Brevo API key
+        "api-key": process.env.BREVO_API_KEY,
         "content-type": "application/json",
       },
       body: JSON.stringify({
@@ -46,8 +51,13 @@ app.post("/send", async (req, res) => {
     res.status(200).json({ message: "Email sent successfully", data });
   } catch (error) {
     console.error("❌ Server error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
+});
+
+// Fallback for unknown routes (always return JSON, not HTML)
+app.use((req, res) => {
+  res.status(404).json({ error: "Not Found" });
 });
 
 const PORT = process.env.PORT || 5000;
