@@ -2,41 +2,34 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const fetch = require("node-fetch"); // make sure node-fetch is installed
 
 const app = express();
-
-// Allow only your frontend domain
-app.use(cors({
-  origin: "https://shashank-2004.github.io"
-}));
+app.use(cors());
 app.use(bodyParser.json());
 
-// Health check
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running 🚀" });
-});
-
-// Handle form submission
+// POST route for form submission
 app.post("/submit", async (req, res) => {
   const { name, mobile, age, email } = req.body;
-  console.log("📩 Form data received:", req.body);
 
   if (!name || !mobile || !age || !email) {
     return res.json({ success: false, message: "All fields are required" });
   }
 
+  console.log("📩 Form data received:", req.body);
+
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
-        "api-key": process.env.BREVO_API_KEY,
-        "Content-Type": "application/json",
-        "Accept": "application/json"
+        "accept": "application/json",
+        "api-key": process.env.BREVO_API_KEY, // ✅ API key from Render
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         sender: { name: "Consultation Form", email: process.env.BREVO_SENDER },
         to: [{ email: process.env.BREVO_RECEIVER }],
-        replyTo: { email: email, name: name },
+        replyTo: { email: email },
         subject: "New Consultation Request",
         htmlContent: `
           <h2>New Consultation Request</h2>
@@ -50,22 +43,22 @@ app.post("/submit", async (req, res) => {
       })
     });
 
-    const result = await response.json();
-
+    const data = await response.json();
     if (response.ok) {
-      console.log("✅ Email sent:", result);
-      return res.json({ success: true, message: "Email sent successfully!" });
+      console.log("✅ Email sent successfully:", data);
+      res.json({ success: true, message: "Email sent successfully!" });
     } else {
-      console.error("❌ Brevo API error:", result);
-      return res.json({ success: false, message: "Failed to send email", error: result });
+      console.error("❌ Brevo API error:", data);
+      res.json({ success: false, message: "Failed to send email" });
     }
-
   } catch (err) {
-    console.error("❌ API request error:", err);
-    return res.json({ success: false, message: "Failed to send email", error: err.message });
+    console.error("❌ Error sending email:", err);
+    res.json({ success: false, message: "Error sending email" });
   }
 });
 
-// Dynamic port for Render
+// Use Render’s provided port
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
