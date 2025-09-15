@@ -5,6 +5,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "node-fetch": "^2.7.0",
     "nodemailer": "^7.0.6"
   },
   "name": "consult-form",
@@ -17,5 +18,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shashank-2004/consult_form.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Shashank-2004/consult_form/issues"
+  },
+  "homepage": "https://github.com/Shashank-2004/consult_form#readme"
 }
