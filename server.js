@@ -1,19 +1,20 @@
+// server.js
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const fetch = require("node-fetch");
+const fetch = require("node-fetch"); // make sure node-fetch is installed
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Health check (useful for testing if backend is running)
-app.get("/", (req, res) => {
-  res.json({ status: "OK", message: "Consultation Form API is running 🚀" });
-});
-
-app.post("/send", async (req, res) => {
+// POST route for form submission
+app.post("/submit", async (req, res) => {
   const { name, mobile, age, email } = req.body;
+
+  if (!name || !mobile || !age || !email) {
+    return res.json({ success: false, message: "All fields are required" });
+  }
 
   console.log("📩 Form data received:", req.body);
 
@@ -22,45 +23,42 @@ app.post("/send", async (req, res) => {
       method: "POST",
       headers: {
         "accept": "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-        "content-type": "application/json",
+        "api-key": process.env.BREVO_API_KEY, // ✅ API key from Render
+        "content-type": "application/json"
       },
       body: JSON.stringify({
         sender: { name: "Consultation Form", email: process.env.BREVO_SENDER },
         to: [{ email: process.env.BREVO_RECEIVER }],
+        replyTo: { email: email },
         subject: "New Consultation Request",
-        textContent: `📩 New Consultation Request\n\nName: ${name}\nMobile: ${mobile}\nAge: ${age}\nEmail: ${email}\n`,
         htmlContent: `
-          <h2>📩 New Consultation Request</h2>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Mobile:</b> ${mobile}</p>
-          <p><b>Age:</b> ${age}</p>
-          <p><b>Email:</b> ${email}</p>
-        `,
-      }),
+          <h2>New Consultation Request</h2>
+          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+            <tr><th align="left">Name</th><td>${name}</td></tr>
+            <tr><th align="left">Mobile</th><td>${mobile}</td></tr>
+            <tr><th align="left">Age</th><td>${age}</td></tr>
+            <tr><th align="left">Email</th><td>${email}</td></tr>
+          </table>
+        `
+      })
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
+    if (response.ok) {
+      console.log("✅ Email sent successfully:", data);
+      res.json({ success: true, message: "Email sent successfully!" });
+    } else {
       console.error("❌ Brevo API error:", data);
-      return res.status(500).json({ error: "Failed to send email", details: data });
+      res.json({ success: false, message: "Failed to send email" });
     }
-
-    console.log("✅ Email sent successfully:", data);
-    res.status(200).json({ message: "Email sent successfully", data });
-  } catch (error) {
-    console.error("❌ Server error:", error);
-    res.status(500).json({ error: "Internal Server Error", details: error.message });
+  } catch (err) {
+    console.error("❌ Error sending email:", err);
+    res.json({ success: false, message: "Error sending email" });
   }
 });
 
-// Fallback for unknown routes (always return JSON, not HTML)
-app.use((req, res) => {
-  res.status(404).json({ error: "Not Found" });
-});
-
-const PORT = process.env.PORT || 5000;
+// Use Render’s provided port
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
