@@ -1,89 +1,62 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const nodemailer = require("nodemailer");
-const cors = require("cors");
-const path = require("path");
+// server.js
+require('dotenv').config();
+const express = require('express');
+const nodemailer = require('nodemailer');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
-
-// Allow requests from your GitHub Pages site
-app.use(cors({
-  origin: "https://shashank-2004.github.io",
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
-}));
-
-app.use(bodyParser.json());
-
-// Serve static files from public (if any)
-const publicPath = path.join(__dirname, "public");
-app.use(express.static(publicPath));
-
-// Default route (just shows your frontend if needed)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
-});
-
-// Nodemailer setup (✅ uses Render env vars for safety)
-let transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use 'false' for STARTTLS
-  auth: {
-    user: process.env.GMAIL_USER, // set in Render Environment
-    pass: process.env.GMAIL_PASS  // set in Render Environment
-  },
-  tls: {
-    // This is optional, but can help with some firewalls
-    rejectUnauthorized: false
-  }
-});
-
-// Email sending function
-function sendConsultationEmail(data, res) {
-  const { name, mobile, age, email } = data;
-
-  if (!name || !mobile || !age || !email) {
-    return res.json({ success: false, message: "All fields are required" });
-  }
-
-  const mailOptions = {
-    from: `"Consultation Form" <${process.env.GMAIL_USER}>`,
-    to: process.env.GMAIL_USER,
-    replyTo: email,
-    subject: "New Consultation Request",
-    html: `
-      <h2>New Consultation Request</h2>
-      <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-        <tr><th align="left">Name</th><td>${name}</td></tr>
-        <tr><th align="left">Mobile</th><td>${mobile}</td></tr>
-        <tr><th align="left">Age</th><td>${age}</td></tr>
-        <tr><th align="left">Email</th><td>${email}</td></tr>
-      </table>
-    `
-  };
-
-  transporter.sendMail(mailOptions, (error) => {
-  if (error) {
-    console.error("❌ Email error:", error);
-    return res.json({ success: false, message: "Email error: " + error.message });
-  }
-  res.json({ success: true, message: "Email sent successfully!" });
-});
-}
-
-// Main form submission route
-app.post("/submit", (req, res) => {
-  sendConsultationEmail(req.body, res);
-});
-
-// Also accept POST at root (optional)
-app.post("/", (req, res) => {
-  sendConsultationEmail(req.body, res);
-});
-
-// Dynamic port for deployment
 const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Nodemailer transporter setup
+// Use environment variables for security.
+// For Gmail, use an App Password if 2-Step Verification is on.
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_USER, // Your Gmail address from .env
+        pass: process.env.GMAIL_PASS  // Your App Password from .env
+    }
+});
+
+// Route to handle form submissions
+app.post('/submit', async (req, res) => {
+    const { name, mobile, age, email } = req.body;
+
+    // Basic validation
+    if (!name || !mobile || !age || !email) {
+        return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    const mailOptions = {
+        from: `"${name}" <${email}>`,
+        to: process.env.GMAIL_USER, // The email address to receive the submission
+        subject: `New Consultation Request from ${name}`,
+        html: `
+            <h3>New Consultation Request</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Mobile:</strong> ${mobile}</p>
+            <p><strong>Age:</strong> ${age}</p>
+            <p><strong>Email:</strong> ${email}</p>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ success: true, message: 'Form submitted successfully!' });
+    } catch (error) {
+        console.error('Email sending error:', error);
+        res.status(500).json({ success: false, message: 'Failed to send email.' });
+    }
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
