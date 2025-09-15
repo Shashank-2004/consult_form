@@ -2,11 +2,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const fetch = require("node-fetch"); // Node 18+ has global fetch, but safe to include
 
 const app = express();
 
-// Allow only your frontend
+// Allow only your frontend domain
 app.use(cors({
   origin: "https://shashank-2004.github.io"
 }));
@@ -17,7 +16,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend is running 🚀" });
 });
 
-// POST /submit route
+// Handle form submission
 app.post("/submit", async (req, res) => {
   const { name, mobile, age, email } = req.body;
   console.log("📩 Form data received:", req.body);
@@ -37,7 +36,7 @@ app.post("/submit", async (req, res) => {
       body: JSON.stringify({
         sender: { name: "Consultation Form", email: process.env.BREVO_SENDER },
         to: [{ email: process.env.BREVO_RECEIVER }],
-        replyTo: { email: email, name: name },  // 👈 user’s email here
+        replyTo: { email: email, name: name },
         subject: "New Consultation Request",
         htmlContent: `
           <h2>New Consultation Request</h2>
