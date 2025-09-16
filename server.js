@@ -30,16 +30,16 @@ app.post("/submit", async (req, res) => {
         sender: { name: "Consultation Form", email: process.env.BREVO_SENDER },
         to: [{ email: process.env.BREVO_RECEIVER }],
         replyTo: { email: email },
-        subject: "New Consultation Request",
+        subject: `New Consultation Request from ${name} (${mobile})`,  // ✅ unique subject
         htmlContent: `
-          <h2>New Consultation Request</h2>
-          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
-            <tr><th align="left">Name</th><td>${name}</td></tr>
-            <tr><th align="left">Mobile</th><td>${mobile}</td></tr>
-            <tr><th align="left">Age</th><td>${age}</td></tr>
-            <tr><th align="left">Email</th><td>${email}</td></tr>
-          </table>
-        `
+        <h2>New Consultation Request</h2>
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;">
+          <tr><th align="left">Name</th><td>${name}</td></tr>
+          <tr><th align="left">Mobile</th><td>${mobile}</td></tr>
+          <tr><th align="left">Age</th><td>${age}</td></tr>
+          <tr><th align="left">Email</th><td>${email}</td></tr>
+        </table>
+      `
       })
     });
 
