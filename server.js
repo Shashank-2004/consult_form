@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 // POST route for form submission
 app.post("/submit", async (req, res) => {
-  const { name, mobile, age, area, email } = req.body;
+  const { name, mobile, age, area, email,message } = req.body;
 
   if (!name || !mobile || !age || !area || !email) {
     return res.json({ success: false, message: "All fields are required" });
