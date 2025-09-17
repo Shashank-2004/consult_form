@@ -10,9 +10,9 @@ app.use(bodyParser.json());
 
 // POST route for form submission
 app.post("/submit", async (req, res) => {
-  const { name, mobile, age, email } = req.body;
+  const { name, mobile, age, area, email } = req.body;
 
-  if (!name || !mobile || !age || !email) {
+  if (!name || !mobile || !age || !area || !email) {
     return res.json({ success: false, message: "All fields are required" });
   }
 
@@ -37,7 +37,9 @@ app.post("/submit", async (req, res) => {
           <tr><th align="left">Name</th><td>${name}</td></tr>
           <tr><th align="left">Mobile</th><td>${mobile}</td></tr>
           <tr><th align="left">Age</th><td>${age}</td></tr>
+          <tr><th align="left">Area</th><td>${area}</td></tr>
           <tr><th align="left">Email</th><td>${email}</td></tr>
+          <tr><th align="left">Message</th><td>${message}</td></tr>
         </table>
       `
       })
