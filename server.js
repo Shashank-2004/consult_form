@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.post("/submit", async (req, res) => {
   const { name, mobile, age, area, email,message } = req.body;
 
-  if (!name || !mobile || !age || !area || !email) {
+  if (!name || !mobile || !age || !area || !email|| !message) {
     return res.json({ success: false, message: "All fields are required" });
   }
 
